@@ -4,6 +4,7 @@ import NavBar from "../../components/NavBar";
 import TextInput from "../../components/TextInput";
 import { useFormik, Formik, Form, Field } from "formik";
 import * as Yup from "yup";
+import Link from "next/link";
 
 const SignInSchema = Yup.object().shape({
   email: Yup.string()
@@ -65,7 +66,8 @@ const SignInPage = () => {
           Sign In
         </Button>
         <p className="text-slate-900 text-center font-sans text-sm mt-8">
-          Don't have an account ? Sign up here{" "}
+          Don't have an account ?
+          <Link href={"/auth/sign-up"} className="text-blue-800 hover:bg-blue-800 hover:text-white hover:px-2 hover:duration-100 hover:rounded-full hover:h-7 hover:ml-1"> Sign up here </Link>
         </p>
       </div>
     </div>
