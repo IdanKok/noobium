@@ -1,20 +1,11 @@
 import Head from "next/head";
 import type { NextPage } from "next";
-import NavBar from "../components/NavBar";
-import Article from "../components/Article";
-import Category from "../components/Category";
-import Link from 'next/link'
+import NavBar from "../../components/NavBar";
+import Article from "../../components/Article";
 
-const Home: NextPage = () => {
-  const categories = [...Array(10)].map((_, index) => {
-    return {
-      id: index + 1,
-      slug: "technology",
-      name: "Technology",
-    };
-  });
-
-  const articles = [...Array(5)].map((_, index) => {
+const CategoryArticlesPage: NextPage = () => {
+  
+  const articles = [...Array(3)].map((_, index) => {
     return {
       id: index + 1,
       slug: "how to learn redux",
@@ -33,20 +24,17 @@ const Home: NextPage = () => {
   return (
     <div>
       <Head>
-        <title>Noobium</title>
+        <title>Technology || Noobium</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
       <NavBar />
       <div className="w-[720px] mx-auto py-24">
         <div className="mb-16">
-          <p className="font-sans text-sm text-slate-900 mb-4">Your Categories</p>
-          <div className="flex flex-wrap gap-3 ">
-            {categories.map((category) => (
-              <Link key={category.id} href={`/categories/${category.slug}`}>
-              <Category label={category.name} />
-              </Link>
-            ))}
-          </div>
+          <p className="font-sans font-bold  text-slate-400 mb-3">Category</p>
+          <p className="font-sans font-bold  text-slate-900 text-5xl">
+            Technology
+          </p>
         </div>
         {articles.map((article) => (
           <Article
@@ -65,4 +53,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home;
+export default CategoryArticlesPage;
