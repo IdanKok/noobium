@@ -12,7 +12,7 @@ const SearchPage: NextPage = () => {
   const articles = [...Array(5)].map((_, index) => {
     return {
       id: index + 1,
-      slug: "how to learn redux",
+      slug: "how-to-learn-redux",
       title: "How to Learn Redux",
       content:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Egestas etiam morbi varius sapien. Eu arcu morbi tortor rhoncus. Donec pellentesque diam orci enim, nibh diam. Nulla id ut risus quisque felis tristique metus...",
@@ -27,7 +27,7 @@ const SearchPage: NextPage = () => {
   });
   return (
     <div>
-      <Head>
+      <Head>  
         <title>Result For "{router.query.keyword}"|| Noobium</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -45,7 +45,7 @@ const SearchPage: NextPage = () => {
         {articles.map((article) => (
           <Article
             key={article.id}
-            url={article.slug}
+            url={`/articles/${article.slug}`}
             title={article.title}
             content={article.content}
             thumbnail={article.thumbnail}
