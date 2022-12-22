@@ -4,9 +4,14 @@ import { MdSearch } from "react-icons/md";
 import { useEffect, useState } from "react";
 import AccountDropDown from "./AccountDropDown";
 import { useRouter } from "next/router";
-type Props = {};
 
-const NavBar: React.FC<Props> = ({ ...rest }) => {
+
+type Props = {
+
+hasSearchInput?: boolean;
+};
+
+const NavBar: React.FC<Props> = ({ hasSearchInput=true }) => {
   const [keyword, setKeyword] = useState("");
   const isLoggedIn = true;
   const [isDropDownOpen, setIsDropDwonOpen] = useState(false);
@@ -21,6 +26,7 @@ const NavBar: React.FC<Props> = ({ ...rest }) => {
       <Link href={"/"}>
         <img src="/images/logo-with-text.svg" />
       </Link>
+      {hasSearchInput && (
       <div className="w-[720px] absolute left-1/2 -translate-x-1/2 flex items-center">
         <MdSearch className="text-slate-400 mr-4" size={24} />
         <input
@@ -36,6 +42,7 @@ const NavBar: React.FC<Props> = ({ ...rest }) => {
           }}
         />
       </div>
+      )}
       {isLoggedIn && (
         <div className="relative">
           <button onClick={() => setIsDropDwonOpen(!isDropDownOpen)}>

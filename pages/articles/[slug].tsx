@@ -68,7 +68,7 @@ const ArticleDetailPage: NextPage = () => {
         />
         <p
           className="font-serif font-normal text-base text-slate-900 whitespace-pre-line">{article.content}</p>
-        />
+        
       </div>
     </div>
   );
