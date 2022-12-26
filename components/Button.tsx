@@ -14,7 +14,7 @@ const Button: React.FC<Props> = ({
   return (
     <button
       className={classNames(
-        "bg-blue-800 rounded-full px-4  text-sm font-sans text-white",
+        "bg-blue-800 rounded-full px-4  text-sm font-sans text-white disabled:text-slate-400 disabled:bg-slate-200",
         {
           "h-6": size ==='normal',
           "h-10": size === 'large',

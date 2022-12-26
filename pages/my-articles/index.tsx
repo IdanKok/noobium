@@ -1,10 +1,10 @@
 import Head from "next/head";
 import type { NextPage } from "next";
-import NavBar from "../components/NavBar";
-import Article from "../components/Article";
-import Category from "../components/Category";
+import NavBar from "../../components/NavBar";
+import Article from "../../components/Article";
+import Category from "../../components/Category";
 import { useRouter } from "next/router";
-import Button from "../components/Button";
+import Button from "../../components/Button";
 import  Link from 'next/link'
 
 const MyArticlesPage: NextPage = () => {
