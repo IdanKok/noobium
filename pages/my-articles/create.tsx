@@ -2,10 +2,9 @@ import Head from "next/head";
 import type { NextPage } from "next";
 import NavBar from "../../components/NavBar";
 import ThumbnailPicker from "../../components/ThumbnailPicker";
-import { useRouter } from "next/router";
 import { useRef } from "react";
 import Category from "../../components/Category";
-import { useFormik, Formik, Form, Field } from "formik";
+import { useFormik } from "formik";
 import * as Yup from "yup";
 
 const CreateArticleSchema = Yup.object().shape({
@@ -16,7 +15,6 @@ const CreateArticleSchema = Yup.object().shape({
 });
 
 const CreateArticlePage: NextPage = () => {
-  
   const categories = [...Array(10)].map((_, index) => {
     return {
       id: index + 1,
@@ -26,7 +24,6 @@ const CreateArticlePage: NextPage = () => {
   });
 
   const refContentInput = useRef<HTMLTextAreaElement>(null);
-  const router = useRouter();
 
   const formik = useFormik({
     initialValues: {
@@ -42,12 +39,11 @@ const CreateArticlePage: NextPage = () => {
     },
   });
 
-  
   const hasError =
-  !!formik.errors.title ||
-  !!formik.errors.content ||
-  !!formik.errors.thumbnail ||
-  !!formik.errors.categoryId;
+    !!formik.errors.title ||
+    !!formik.errors.content ||
+    !!formik.errors.thumbnail ||
+    !!formik.errors.categoryId;
 
   const handleContentInputGrow = () => {
     if (!refContentInput.current) return;
@@ -56,6 +52,7 @@ const CreateArticlePage: NextPage = () => {
     refContentInput.current.style.height =
       refContentInput.current.scrollHeight + "px";
   };
+
   return (
     <div>
       <Head>

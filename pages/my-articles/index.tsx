@@ -48,6 +48,7 @@ const MyArticlesPage: NextPage = () => {
           <Article
             key={article.id}
             url={`/articles/${article.slug}`}
+            editURL={`/my-articles/${article.slug}`}
             title={article.title}
             content={article.content}
             thumbnail={article.thumbnail}
