@@ -22,6 +22,18 @@ const NavBar: React.FC<Props> = ({
 }) => {
   const [keyword, setKeyword] = useState("");
   const isLoggedIn = true;
+
+  const user = {
+    fullname: "John Doe",
+    email: "john.doe@gmail.com",
+    // photo: "/images/dummy-avatar.png"
+    photo: null,
+  };
+
+  const initialFullName = user.fullname
+    .split(" ")
+    .map((word) => word[0].toUpperCase())
+    .join("");
   const [isDropDownOpen, setIsDropDwonOpen] = useState(false);
   const router = useRouter();
 
@@ -54,8 +66,8 @@ const NavBar: React.FC<Props> = ({
 
       <div className="flex items-center">
         {hasSubmitButton && (
-          <> 
-          {/* <> </> adalah lambang fragment fitur dari react yang berfungsi jika kita ingin menampilkan lebih dari satu komponen/ multiple component */}
+          <>
+            {/* <> </> adalah lambang fragment fitur dari react yang berfungsi jika kita ingin menampilkan lebih dari satu komponen/ multiple component */}
             <Button
               type="button"
               onClick={onClickSubmit}
@@ -70,11 +82,21 @@ const NavBar: React.FC<Props> = ({
         {isLoggedIn && (
           <div className="relative">
             <button onClick={() => setIsDropDwonOpen(!isDropDownOpen)}>
-              <img
-                src="/images/dummy-avatar.png"
-                alt="John Doe"
-                className="w-10 h-10 rounded-full object-cover"
-              />
+              {!!user.photo && (
+                <img
+                  src={user.photo}
+                  alt={user.fullname}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              )}
+
+              {!user.photo && (
+                <div className="w-10 h-10 rounded-full bg-blue-800 flex justify-center items-center">
+                  <p className="font-bold font-sans text-base text-white">
+                    {initialFullName}
+                  </p>
+                </div>
+              )}
             </button>
             {isDropDownOpen && <AccountDropDown />}
           </div>
