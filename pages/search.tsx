@@ -4,27 +4,41 @@ import NavBar from "../components/NavBar";
 import Article from "../components/Article";
 import Category from "../components/Category";
 import { useRouter } from "next/router";
+import useArticlesQuery from "../hooks/queries/use-articles-query";
+import { useEffect, Fragment } from "react";
+import Loading from "react-spinners/BeatLoader";
+
+
 
 const SearchPage: NextPage = () => {
  
   const router = useRouter()
+  const articlesQuery = useArticlesQuery({ search: router.query.keyword as string});
 
-  const articles = [...Array(5)].map((_, index) => {
-    return {
-      id: index + 1,
-      slug: "how-to-learn-redux",
-      title: "How to Learn Redux",
-      content:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Egestas etiam morbi varius sapien. Eu arcu morbi tortor rhoncus. Donec pellentesque diam orci enim, nibh diam. Nulla id ut risus quisque felis tristique metus...",
-      thumbnail: "/images/dummy-thumbnail.png",
-      category: "Technology",
-      date: "2022-09-20 16:00:00",
-      author: {
-        name: "John Doe",
-        photo: "/images/dummy-avatar.png",
-      },
+  useEffect(() => {
+    const handler = () => {
+      const { scrollHeight, scrollTop, clientHeight } =
+        document.documentElement;
+      const isScrollToBottom = scrollHeight - scrollTop === clientHeight;
+      
+      if (isScrollToBottom) {
+        if (articlesQuery.hasNextPage && !articlesQuery.isFetchingNextPage) {
+          articlesQuery.fetchNextPage();
+          console.log(articlesQuery.data);
+        }
+
+       
+      }
     };
-  });
+
+    document.addEventListener("scroll", handler);
+
+    return () => {
+      document.removeEventListener("scroll", handler);
+    };
+  }, [articlesQuery.isSuccess, articlesQuery.data]);
+
+
   return (
     <div>
       <Head>  
@@ -42,18 +56,41 @@ const SearchPage: NextPage = () => {
             {router.query.keyword}
           </p>
         </div>
-        {articles.map((article) => (
-          <Article
-            key={article.id}
-            url={`/articles/${article.slug}`}
-            title={article.title}
-            content={article.content}
-            thumbnail={article.thumbnail}
-            category={article.category}
-            date={article.date}
-            author={article.author}
-          />
-        ))}
+     
+        {articlesQuery.isSuccess && (
+          <>
+            {articlesQuery.data.pages.map((page, index) => (
+              <Fragment key={index}>
+                {page.data.map((article) => (
+                  <Article
+                    key={article.id}
+                    url={`/articles/${article?.slug}`}
+                    title={article?.title}
+                    content={article?.content_preview}
+                    thumbnail={article?.featured_image}
+                    category={article.category?.name}
+                    date={article?.created_at}
+                    author={{
+                      name: article.user?.name,
+                      photo: article.user?.picture,
+                    }}
+                  />
+                ))}
+              </Fragment>
+            ))}
+            {articlesQuery.isFetchingNextPage && (
+              <div className="flex justify-center mt-8">
+                <Loading size={16} color={"rgb(30 64 175)"} />
+              </div>
+            )}
+          </>
+        )}
+
+        {articlesQuery.isLoading && (
+          <div className="flex justify-center">
+            <Loading size={16} color={"rgb(30 64 175)"} />
+          </div>
+        )}
       </div>
     </div>
   );
