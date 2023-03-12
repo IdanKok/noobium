@@ -5,22 +5,44 @@ import TextInput from "../../components/TextInput";
 import { useFormik, Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import Link from "next/link";
+import Loading from "react-spinners/BeatLoader";
+import useSignInMutation from "../../hooks/mutations/use-sign-in-mutation";
+import { useRouter } from "next/router";
+import { toast } from "react-hot-toast";
+import { useQueryClient } from "@tanstack/react-query";
+
 
 const SignInSchema = Yup.object().shape({
   email: Yup.string()
     .email("Email Format Is Invalid")
     .required("Email Is Required"),
+    password: Yup.string().required("Password Is Required"),
 });
 
 const SignInPage = () => {
+  const signInMutation = useSignInMutation()
+  const router = useRouter()
+  const queryClient = useQueryClient()
+
   const formik = useFormik({
     initialValues: {
       email: "",
       password: "",
     },
     validationSchema: SignInSchema,
-    onSubmit: () => {
-      alert("Sign In Succesfully");
+    onSubmit: async(values) => {
+     try {
+      const response = await signInMutation.mutateAsync({
+        email: values.email,
+        password: values.password,
+      });
+     
+      queryClient.setQueryData(['user'], response.user)
+      localStorage.setItem('access_token', response.access_token.token)
+      router.push("/")
+     } catch (error) {
+        toast.error('Email or Password is Invalid !')
+     }
     },
   });
   return (
@@ -29,6 +51,12 @@ const SignInPage = () => {
         <title>Sig In | Noobium</title>
       </Head>
       <NavBar />
+      {signInMutation.isLoading && (
+        <div className=" h-screen flex justify-center items-center">
+          <Loading size={16} color="rgb(30 64 175)"/>
+        </div>
+      )}
+      {!signInMutation.isLoading &&(
       <div className="w-[400px] mx-auto py-24">
         <h1 className="font-sans font-bold text-slate-900 text-5xl text-center mb-4">
           Sign In
@@ -62,7 +90,7 @@ const SignInPage = () => {
 
         <div className="h-10" />
 
-        <Button size="large" isFullWidth onClick={() => formik.handleSubmit()}>
+        <Button type="button" size="large" isFullWidth onClick={() => formik.handleSubmit()}>
           Sign In
         </Button>
         <p className="text-slate-900 text-center font-sans text-sm mt-8">
@@ -70,6 +98,7 @@ const SignInPage = () => {
           <Link href={"/auth/sign-up"} className="text-blue-800 hover:bg-blue-800 hover:text-white hover:px-2 hover:duration-100 hover:rounded-full hover:h-7 hover:ml-1"> Sign up here </Link>
         </p>
       </div>
+      )}
     </div>
   );
 };

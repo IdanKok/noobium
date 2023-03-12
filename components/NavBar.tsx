@@ -4,6 +4,7 @@ import { MdSearch } from "react-icons/md";
 import { useEffect, useState } from "react";
 import AccountDropDown from "./AccountDropDown";
 import { useRouter } from "next/router";
+import useUserQuery from "../hooks/queries/use-user-query";
 
 type Props = {
   hasSearchInput?: boolean;
@@ -20,22 +21,16 @@ const NavBar: React.FC<Props> = ({
   submitLabel,
   onClickSubmit,
 }) => {
+  const userQuery = useUserQuery()
   const [keyword, setKeyword] = useState("");
-  const isLoggedIn = true;
-
-  const user = {
-    fullname: "John Doe",
-    email: "john.doe@gmail.com",
-    // photo: "/images/dummy-avatar.png"
-    photo: null,
-  };
-
-  const initialFullName = user.fullname
+  const isLoggedIn = !!userQuery.data;
+  const initialFullName = userQuery.data?.name
     .split(" ")
     .map((word) => word[0].toUpperCase())
-    .join("");
+    .join("") || "";
   const [isDropDownOpen, setIsDropDwonOpen] = useState(false);
   const router = useRouter();
+ 
 
   useEffect(() => {
     setKeyword((router.query.keyword as string) || "");
@@ -82,15 +77,15 @@ const NavBar: React.FC<Props> = ({
         {isLoggedIn && (
           <div className="relative">
             <button onClick={() => setIsDropDwonOpen(!isDropDownOpen)}>
-              {!!user.photo && (
+              {!!userQuery.data?.picture && (
                 <img
-                  src={user.photo}
-                  alt={user.fullname}
+                  src={userQuery.data.picture}
+                  alt={userQuery.data.name}
                   className="w-10 h-10 rounded-full object-cover"
                 />
               )}
 
-              {!user.photo && (
+              {!userQuery.data?.picture && (
                 <div className="w-10 h-10 rounded-full bg-blue-800 flex justify-center items-center">
                   <p className="font-bold font-sans text-base text-white">
                     {initialFullName}
