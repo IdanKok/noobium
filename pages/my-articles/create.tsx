@@ -5,7 +5,15 @@ import ThumbnailPicker from "../../components/ThumbnailPicker";
 import { useRef } from "react";
 import Category from "../../components/Category";
 import { useFormik } from "formik";
+import Loading from "react-spinners/BeatLoader";
+
+
 import * as Yup from "yup";
+import { useRouter } from "next/router";
+import useCreateArticleMutation from "../../hooks/mutations/use-create-article-mutation";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
+import useCategoriesQuery from "../../hooks/queries/use-categories-query";
 
 const CreateArticleSchema = Yup.object().shape({
   title: Yup.string().required("Title is required"),
@@ -15,6 +23,11 @@ const CreateArticleSchema = Yup.object().shape({
 });
 
 const CreateArticlePage: NextPage = () => {
+  const refContentInput = useRef<HTMLTextAreaElement>(null);
+  const router = useRouter()
+  const createArticleMutation = useCreateArticleMutation()
+  const categoriesQuery = useCategoriesQuery();
+
   const categories = [...Array(10)].map((_, index) => {
     return {
       id: index + 1,
@@ -23,7 +36,7 @@ const CreateArticlePage: NextPage = () => {
     };
   });
 
-  const refContentInput = useRef<HTMLTextAreaElement>(null);
+  
 
   const formik = useFormik({
     initialValues: {
@@ -34,8 +47,21 @@ const CreateArticlePage: NextPage = () => {
     },
     validationSchema: CreateArticleSchema,
     validateOnMount: true,
-    onSubmit: () => {
-      alert("Submitted !");
+     onSubmit: async (values) => {
+      if(!values.categoryId || !values.thumbnail) return
+      try {
+         await createArticleMutation.mutateAsync({
+          title: values.title,
+          content: values.content,
+          featured_image: values.thumbnail,
+          category_id: values.categoryId,
+        });
+
+        router.push("/my-articles");
+        toast.success("Create Article Succesfull !");
+      } catch (error) {
+        toast.error("Failed to create an Article !");
+      }
     },
   });
 
@@ -66,6 +92,12 @@ const CreateArticlePage: NextPage = () => {
         submitLabel="Publish"
         onClickSubmit={formik.handleSubmit}
       />
+      {createArticleMutation.isLoading && (
+        <div className=" h-screen flex justify-center items-center">
+          <Loading size={16} color="rgb(30 64 175)" />
+        </div>
+      )}
+      {!createArticleMutation.isLoading && (
       <div className="w-[720px] mx-auto py-24">
         <input
           className="font-sans font-bold placeholder-slate-200 text-5xl outline-none text-slate-900 w-full mb-12"
@@ -88,21 +120,31 @@ const CreateArticlePage: NextPage = () => {
         />
 
         <div className="pt-12 border-t border-slate-200 mt-40">
+        {categoriesQuery.isSuccess && (
+          <>
           <p className="font-sans text-sm text-slate-900 mb-4">
             Choose a Category
           </p>
           <div className="flex flex-wrap gap-3 ">
-            {categories.map((category) => (
+            {categoriesQuery.data.map((category) => (
               <Category
                 key={category.id}
-                label={category.name}
+                label={category.slug}
                 isSelected={formik.values.categoryId === category.id}
                 onClick={() => formik.setFieldValue("categoryId", category.id)}
               />
             ))}
+             {categoriesQuery.isLoading && (
+            <div className="flex justify-center">
+              <Loading size={16} color={"rgb(30 64 175)"} />
+            </div>
+          )}
           </div>
+          </>
+        )}
         </div>
       </div>
+      )}
     </div>
   );
 };
