@@ -28,40 +28,31 @@ type Response = {
   last_page: number;
   per_page: number;
 };
-type Payload = {
-  search?: string;
-  category?: string;
-};
 
-const action = async (page: number, payload?: Payload): Promise<Response> => {
-  let res;
-
-  if (payload?.category) {
-    res = await axios.get(`/categories/${payload?.category}`, {
-      params: {
-        page,
-      },
-    });
-  } else {
-    res = await axios.get("/articles", {
-      params: {
-        page,
-        search: payload?.search,
-      },
-    });
-  }
+const action = async (page: number): Promise<Response> => {
+  const token = localStorage.getItem("access_token");
+  const res = await axios.get("/me/articles", {
+    params: {
+      page,
+    },
+    headers: {
+        Authorization: `Bearer ${token}`,
+      
+        
+    }
+  });
   console.log(res.data.data)
   return res.data.data;
 };
 
-const useArticlesQuery = (payload?: Payload) => {
+const useMyArticlesQuery = () => {
   return useInfiniteQuery(
-    ["articles", payload],
-    ({ pageParam = 1 }) => action(pageParam, payload),
+    ["my-articles"],
+    ({ pageParam = 1 }) => action(pageParam),
     {
       getNextPageParam: (lastPage) => {
         if (lastPage.current_page === lastPage.last_page) {
-          return undefined; 
+          return undefined;
         }
         return lastPage.current_page + 1;
       },
@@ -69,4 +60,4 @@ const useArticlesQuery = (payload?: Payload) => {
   );
 };
 
-export default useArticlesQuery;
+export default useMyArticlesQuery;
