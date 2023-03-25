@@ -6,13 +6,21 @@ import { useEffect, useRef } from "react";
 import Category from "../../components/Category";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import Loading from "react-spinners/BeatLoader";
+import Link from "next/link";
+
+import { useRouter } from "next/router";
+import useMyArticleDetailQuery from "../../hooks/queries/use-my-article-detail.query";
+import useCategoriesQuery from "../../hooks/queries/use-categories-query";
+import useEditArticleMutation from "../../hooks/mutations/use-edit-article-mutation";
+import { toast } from "react-hot-toast";
 
 type FormValues = {
-  title: string
-  content: string
-  thumbnail: File | null
-  categoryId: number | null
-}
+  title: string;
+  content: string;
+  thumbnail: File | null;
+  categoryId: number | null;
+};
 
 const EditArticleSchema = Yup.object().shape({
   title: Yup.string().required("Title is required"),
@@ -21,17 +29,12 @@ const EditArticleSchema = Yup.object().shape({
 });
 
 const EditArticlePage: NextPage = () => {
-
-  const categories = [...Array(10)].map((_, index) => {
-    return {
-      id: index + 1,
-      slug: "technology",
-      name: "Technology",
-    };
-  });
-
   const refContentInput = useRef<HTMLTextAreaElement>(null);
-
+  const router = useRouter();
+  const myArticleDetailQuery = useMyArticleDetailQuery(router.query.id as string);
+  const categoriesQuery = useCategoriesQuery();
+  const editArticleMutation = useEditArticleMutation()
+  
   const initialValues: FormValues = {
     title: "",
     content: "",
@@ -43,34 +46,26 @@ const EditArticlePage: NextPage = () => {
     initialValues,
     validationSchema: EditArticleSchema,
     validateOnMount: true,
-    onSubmit: () => {
-      alert("Submitted !");
+    onSubmit: async (values) => {
+      if(!values.categoryId || !myArticleDetailQuery.data?.id) return
+      try {
+         await editArticleMutation.mutateAsync({
+          id: myArticleDetailQuery.data?.id,
+          title: values.title,
+          content: values.content,
+          featured_image: values.thumbnail,
+          category_id: values.categoryId,
+        });
+
+        router.push("/my-articles");
+        toast.success("Update an Article Succesfull !");
+      } catch (error) {
+        toast.error("Failed to update an Article !");
+      }
     },
   });
 
-  const article = {
-    id: 1,
-    slug: "how to learn redux",
-    title: "How to Learn Redux",
-    content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer et nibh egestas suspendisse nulla ipsum etiam gravida. Est eu, sed tortor in rutrum in. Egestas
-    
-    tincidunt sed venenatis faucibus sed. Arcu dictum lobortis pellentesque purus massa. Cras hendrerit blandit sed at. Euismod praesent ultrices sit cursus molestie ac. Amet, pellentesque interdum etiam tortor, dui. Quam cras quis condimentum amet, rhoncus diam, dictumst. Platea eu sodales vitae ipsum ac. Auctor etiam sagittis faucibus non pharetra elit.\n\n
-     Malesuada massa pellentesque nunc diam neque. Consequat sollicitudin purus in egestas egestas commodo non tempus. Praesent lorem est, quis tincidunt varius. Quisque facilisis dignissim scelerisque nunc senectus rhoncus massa sollicitudin id.
-     Ornare viverra neque vitae gravida habitasse tellus ultrices. Id blandit ut sed sed aliquam vitae. Eu nibh dignissim rutrum sit blandit. Quisque libero commodo, cursus est cursus. Cursus varius eget velit consectetur vel potenti.\n\n
-     Ipsum molestie erat laoreet in pharetra. Rhoncus, netus malesuada velit felis proin sem. Aliquet dictum sagittis a ornare lacus sed ut. Aenean vitae convallis in adipiscing. At dictumst sagittis, tincidunt pellentesque scelerisque pellentesque sem auctor. Ultricies urna sit in ac sed arcu turpis. Feugiat elit quam pulvinar elementum, turpis auctor ornare leo, neque.\n\n
-     Est interdum sed amet integer libero tincidunt. Mauris, nunc sapien, donec placerat massa. Tellus proin tortor, hendrerit sed vitae. Lectus aliquet purus elementum at et. Adipiscing imperdiet lacus eget aenean risus egestas malesuada lobortis pulvinar.
-     Ut at rhoncus suspendisse non sed nec viverra. Cursus vitae adipiscing morbi vitae. Ultricies non neque, sed pulvinar sit amet, nunc. Bibendum vitae et ac cras nulla mi id amet. A viverra sed gravida id dictum.`,
-    thumbnail: "/images/dummy-thumbnail.png",
-    category: {
-      id: 1,
-      name: "Technology",
-    },
-    date: "2022-09-20 16:00:00",
-    author: {
-      name: "John Doe",
-      photo: "/images/dummy-avatar.png",
-    },
-  };
+ 
 
   const hasError =
     !!formik.errors.title ||
@@ -88,16 +83,16 @@ const EditArticlePage: NextPage = () => {
 
   useEffect(() => {
     formik.setValues({
-      title: article.title,
-      content: article.content,
+      title: myArticleDetailQuery.data?.title || '',
+      content: myArticleDetailQuery.data?.content || '',
       thumbnail: null,
-      categoryId: article.category.id,
+      categoryId: myArticleDetailQuery.data?.category_id || null,
     });
 
     setTimeout(() => {
-      handleContentInputGrow()
-    }, 200)
-  }, []);
+      handleContentInputGrow();
+    }, 200);
+  }, [myArticleDetailQuery.data]);
 
   return (
     <div>
@@ -121,7 +116,7 @@ const EditArticlePage: NextPage = () => {
           onChange={formik.handleChange}
         />
         <ThumbnailPicker
-          preview={article.thumbnail}
+          preview={myArticleDetailQuery.data?.featured_image}
           onPick={(file) => formik.setFieldValue("thumbnail", file)}
         />
         <textarea
@@ -139,14 +134,26 @@ const EditArticlePage: NextPage = () => {
             Choose a Category
           </p>
           <div className="flex flex-wrap gap-3 ">
-            {categories.map((category) => (
+          {categoriesQuery.isSuccess && (
+          <>
+          
+          <div className="flex flex-wrap gap-3 ">
+            {categoriesQuery.data.map((category) => (
               <Category
                 key={category.id}
-                label={category.name}
+                label={category.slug}
                 isSelected={formik.values.categoryId === category.id}
                 onClick={() => formik.setFieldValue("categoryId", category.id)}
               />
             ))}
+             {categoriesQuery.isLoading && (
+            <div className="flex justify-center">
+              <Loading size={16} color={"rgb(30 64 175)"} />
+            </div>
+          )}
+          </div>
+          </>
+        )}
           </div>
         </div>
       </div>
