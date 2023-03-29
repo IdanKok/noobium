@@ -8,13 +8,29 @@ import Link from "next/link";
 import useMyArticlesQuery from "../../hooks/queries/use-my-articles-query";
 import { useEffect, Fragment } from "react";
 import Loading from "react-spinners/BeatLoader";
+import useDeleteArticleMutation from "../../hooks/mutations/use-delete-article-mutation";
+import { toast } from "react-hot-toast";
 
 
 const MyArticlesPage: NextPage = () => {
   const router = useRouter();
 
   const myArticlesQuery = useMyArticlesQuery();
+  const deleteArticleMutation = useDeleteArticleMutation()
 
+  const deleteArticle = async (articleId: number) => {
+   
+    try {
+       await deleteArticleMutation.mutateAsync({
+       id: articleId  
+      });
+      myArticlesQuery.refetch()
+
+      toast.success("Delete an article Succesfull !");
+    } catch (error) {
+      toast.error("Failed to delete an Article !");
+    }
+  }
   useEffect(() => {
     const handler = () => {
       const { scrollHeight, scrollTop, clientHeight } =
@@ -75,6 +91,13 @@ const MyArticlesPage: NextPage = () => {
                       photo: article.user?.picture,
                     }}
                     hasOptions
+                    onClickDelete={() => {
+                      const isConfirmed = confirm('Are you sure want to delete this article ?')
+
+                      if(isConfirmed){
+                        deleteArticle(article.id)
+                      }
+                    }}
                   />
                 ))}
               </Fragment>

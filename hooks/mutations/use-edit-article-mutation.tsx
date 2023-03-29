@@ -6,7 +6,7 @@ type Payload = {
   id: number;
   title: string;
   content: string;
-  category_id: number;
+  category_id: string;
   featured_image?: File | null;
 };
 
