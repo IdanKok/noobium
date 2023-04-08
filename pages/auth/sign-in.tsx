@@ -10,6 +10,8 @@ import useSignInMutation from "../../hooks/mutations/use-sign-in-mutation";
 import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
+import useGoogleSignInMutation from "../../hooks/mutations/use-google-sign-in-mutation";
 
 
 const SignInSchema = Yup.object().shape({
@@ -23,6 +25,8 @@ const SignInPage = () => {
   const signInMutation = useSignInMutation()
   const router = useRouter()
   const queryClient = useQueryClient()
+  const refGoogleButton = useRef<HTMLDivElement>(null)
+  const googleSignInMutation = useGoogleSignInMutation()
 
   const formik = useFormik({
     initialValues: {
@@ -45,18 +49,68 @@ const SignInPage = () => {
      }
     },
   });
+
+  const callback = async (googleResponse: any) => {
+    try {
+      const response = await googleSignInMutation.mutateAsync({
+        token: googleResponse.credential
+      });
+
+   
+   
+      queryClient.setQueryData(['user'], response.user)
+      localStorage.setItem('access_token', response.access_token.token)
+      console.log('datanya', response)
+      router.push("/")
+     } catch (error) {
+     
+        toast.error('Failed to sign in with google !')
+        console.log(error)
+     }
+  }
+
+  useEffect(() =>  {
+    const clientId = "966958136435-ubht832lb5u37gri84f5anjrrdcr1noi.apps.googleusercontent.com"
+
+    try {
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback,
+      })
+      
+      
+      window.google.accounts.id.renderButton(refGoogleButton.current, {
+        theme: 'outline',
+        size: 'large',
+        shape: 'pill',
+        width: 400,
+      })
+    } catch (error) {
+      location.reload()
+    }
+
+    
+
+   
+  }, [])
+
+
   return (
+    
     <div>
       <Head>
         <title>Sig In | Noobium</title>
+        <script src="https://accounts.google.com/gsi/client" async defer/>
       </Head>
+   
+      {/* <script src="https://apis.google.com/js/platform.js" async defer></script> */}
       <NavBar />
-      {signInMutation.isLoading && (
+      {signInMutation.isLoading || googleSignInMutation.isLoading &&(
         <div className=" h-screen flex justify-center items-center">
           <Loading size={16} color="rgb(30 64 175)"/>
         </div>
       )}
-      {!signInMutation.isLoading &&(
+      {!signInMutation.isLoading && !googleSignInMutation.isLoading &&(
       <div className="w-[400px] mx-auto py-24">
         <h1 className="font-sans font-bold text-slate-900 text-5xl text-center mb-4">
           Sign In
@@ -93,14 +147,20 @@ const SignInPage = () => {
         <Button type="button" size="large" isFullWidth onClick={() => formik.handleSubmit()}>
           Sign In
         </Button>
+        <div className="border-b my-8"/>
+        <div ref={refGoogleButton}/>
+        <div className="border-b my-8"/>
+      
         <p className="text-slate-900 text-center font-sans text-sm mt-8">
           Don't have an account ?
           <Link href={"/auth/sign-up"} className="text-blue-800 hover:bg-blue-800 hover:text-white hover:px-2 hover:duration-100 hover:rounded-full hover:h-7 hover:ml-1"> Sign up here </Link>
         </p>
+      
       </div>
       )}
     </div>
   );
+  
 };
 
 export default SignInPage;
