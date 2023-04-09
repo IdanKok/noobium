@@ -55,6 +55,8 @@ const SignUpPage = () => {
 
         queryClient.setQueryData(["user"], response.user);
         localStorage.setItem("access_token", response.access_token.token);
+        localStorage.setItem('access_token_generated_at', `${Date.now()}`)
+        localStorage.setItem('access_token_expired_at', `${Date.now() + 3600 * 1000 }`)
         router.push("/");
       } catch (error) {
         toast.error("Failed to signup");
@@ -74,6 +76,8 @@ const SignUpPage = () => {
    
       queryClient.setQueryData(['user'], response.user)
       localStorage.setItem('access_token', response.access_token.token)
+      localStorage.setItem('access_token_generated_at', `${Date.now()}`)
+      localStorage.setItem('access_token_expired_at', `${Date.now() + 3600 * 1000 }`)
       console.log('datanya', response)
       router.push("/")
      } catch (error) {
@@ -102,7 +106,7 @@ const SignUpPage = () => {
     <div>
       <Head>
         <title>Sign Up | Noobium</title>
-        <script src="https://accounts.google.com/gsi/client" async defer/>
+       
       </Head>
       <NavBar />
       {signUpMutation.isLoading  || googleSignInMutation.isLoading &&(

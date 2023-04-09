@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import AccountDropDown from "./AccountDropDown";
 import { useRouter } from "next/router";
 import useUserQuery from "../hooks/queries/use-user-query";
+import { refreshToken } from "../helpers/axios";
 
 type Props = {
   hasSearchInput?: boolean;
@@ -35,6 +36,22 @@ const NavBar: React.FC<Props> = ({
   useEffect(() => {
     setKeyword((router.query.keyword as string) || "");
   }, [router.query.keyword]);
+
+  useEffect(() => {
+    const generatedAt = localStorage.getItem('access_token_generated_at')
+    const expiredAt = localStorage.getItem('access_token_expired_at')
+  
+    if(generatedAt && expiredAt){
+      const now = Date.now()
+      const afterGenerated15min = Number(generatedAt) + 900 * 1000
+      const beforeExpired5min = Number(expiredAt) - 300 * 1000
+
+      if(now > afterGenerated15min && now < beforeExpired5min){
+        refreshToken()
+      }
+
+    }
+  })
 
   return (
     <header className="flex h-16 border-b border-slate-200 items-center justify-between px-24">
