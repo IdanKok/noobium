@@ -42,7 +42,7 @@ const SearchPage: NextPage = () => {
   return (
     <div>
       <Head>  
-        <title>Result For "{router.query.keyword}"|| Noobium</title>
+        <title>Result For `&quot;{router.query.keyword}`&quot;|| Noobium</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       

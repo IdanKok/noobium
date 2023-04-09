@@ -27,7 +27,7 @@ const SignUpSchema = Yup.object().shape({
     .max(50, "Password should have maximum 50 characters")
     .required("Password Is Required"),
   confirmPassword: Yup.string()
-    .oneOf([Yup.ref("password"), null], "Confirm password is mismatch")
+    .oneOf([Yup.ref("password"), `${null}`], "Confirm password is mismatch")
     .required("Confirm Password is required"),
 });
 

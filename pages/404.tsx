@@ -17,7 +17,7 @@ const NotFoundPage: NextPage = () => {
           404
         </h1>
         <p className="font-sans font-normal text-base text-slate-900 text-center mb-16">
-          There's no content here{" "}
+          There&apos;s no content here{" "}
         </p>
         <Link href={"/"}>
           <Button size="large" type="button">

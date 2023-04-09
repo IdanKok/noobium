@@ -54,7 +54,7 @@ const EditArticlePage: NextPage = () => {
           title: values.title,
           content: values.content,
           featured_image: values.thumbnail,
-          category_id: values.categoryId,
+          category_id: `${values.categoryId}`,
         });
 
         router.push("/my-articles");

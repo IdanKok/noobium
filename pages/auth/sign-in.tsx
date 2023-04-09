@@ -157,7 +157,7 @@ const SignInPage = () => {
           <div className="border-b my-8" />
 
           <p className="text-slate-900 text-center font-sans text-sm mt-8">
-            Don't have an account ?
+            Don&apos;t have an account ?
             <Link
               href={"/auth/sign-up"}
               className="text-blue-800 hover:bg-blue-800 hover:text-white hover:px-2 hover:duration-100 hover:rounded-full hover:h-7 hover:ml-1"
